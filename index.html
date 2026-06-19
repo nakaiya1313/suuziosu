@@ -16,10 +16,10 @@
 
   *{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
   html,body{margin:0; height:100%;}
-  body{ background:linear-gradient(160deg,var(--bg),var(--bg2)); color:var(--txt); height:100dvh; overflow:hidden;
+  body{ background:linear-gradient(160deg,var(--bg),var(--bg2)) fixed; color:var(--txt); min-height:100dvh;
     font-family:"Hiragino Maru Gothic ProN","Hiragino Kaku Gothic ProN","Noto Sans JP","Yu Gothic",Meiryo,system-ui,sans-serif;
-    -webkit-text-size-adjust:100%; display:flex; flex-direction:column; transition:background .3s; }
-  .wrap{ width:100%; max-width:480px; margin:0 auto; flex:1; display:flex; flex-direction:column; padding:8px 12px calc(8px + env(safe-area-inset-bottom)); min-height:0; }
+    -webkit-text-size-adjust:100%; transition:background .3s; }
+  .stage{ width:100%; max-width:480px; margin:0 auto; height:100dvh; display:flex; flex-direction:column; padding:8px 12px 6px; min-height:0; }
 
   header{ display:flex; align-items:center; gap:6px; padding:4px 2px; }
   .brand{ font-size:1.15rem; font-weight:800; } .brand .em{ color:var(--accent); }
@@ -33,10 +33,10 @@
   .barwrap{ height:12px; background:var(--panel); border:1px solid var(--line); border-radius:999px; overflow:hidden; margin-bottom:10px; }
   .bar{ height:100%; width:100%; background:linear-gradient(90deg,var(--good),var(--accent)); border-radius:999px; transition:width .1s linear; }
 
-  .board{ flex:1; min-height:0; display:grid; gap:7px; align-content:center; }
+  .board{ flex:1; min-height:0; display:grid; gap:7px; justify-content:center; align-content:center; }
   .board.sty-roman .tile{ font-family:"Times New Roman","Georgia",serif; letter-spacing:.01em; }
   .tile{ background:var(--tile); color:var(--tile-ink); border:none; border-radius:var(--rad); font-weight:800;
-    font-size:var(--cell-fs,1.6rem); aspect-ratio:1; display:flex; align-items:center; justify-content:center; cursor:pointer;
+    font-size:var(--cell-fs,1.6rem); display:flex; align-items:center; justify-content:center; cursor:pointer;
     box-shadow:0 3px 0 rgba(0,0,0,.16); overflow:hidden; white-space:nowrap; }
   .tile:active{ transform:translateY(2px); box-shadow:0 1px 0 rgba(0,0,0,.16); }
   .tile.done{ background:var(--done-bg)!important; color:var(--done-ink)!important; box-shadow:none; }
@@ -49,7 +49,7 @@
   .toast.show{ animation:toast 1s ease; }
   @keyframes toast{ 0%{opacity:0; transform:translate(-50%,-50%) scale(.6)} 25%{opacity:1; transform:translate(-50%,-50%) scale(1.05)} 80%{opacity:1} 100%{opacity:0} }
 
-  .ad{ margin-top:8px; }
+  .ad{ width:100%; max-width:480px; margin:14px auto 0; padding:0 12px calc(20px + env(safe-area-inset-bottom)); }
   .ad .lb{ font-size:.65rem; color:var(--sub); text-align:center; }
   .adbox{ width:300px; max-width:100%; min-height:250px; margin:2px auto 0; display:flex; align-items:center; justify-content:center;
     border-radius:var(--rad); color:var(--sub); font-size:.78rem; text-align:center; padding:0; overflow:hidden; }
@@ -73,7 +73,7 @@
 </style>
 </head>
 <body data-theme="0">
-<div class="wrap">
+<div class="stage">
   <header>
     <div class="brand">ナンバー<span class="em">タッチ</span></div>
     <button class="ico first" id="theme" aria-label="テーマ変更">🎨</button>
@@ -89,13 +89,13 @@
   <div class="barwrap"><div class="bar" id="bar"></div></div>
 
   <div class="board" id="board"></div>
+</div>
 
-  <div class="ad"><div class="lb">広告</div>
-    <div class="adbox" id="adbox">
-      <!-- admax -->
-      <script src="https://adm.shinobi.jp/s/90211180b2d4d1faaa4426e313ab8906"></script>
-      <!-- admax -->
-    </div>
+<div class="ad"><div class="lb">広告</div>
+  <div class="adbox" id="adbox">
+    <!-- admax -->
+    <script src="https://adm.shinobi.jp/s/90211180b2d4d1faaa4426e313ab8906"></script>
+    <!-- admax -->
   </div>
 </div>
 
@@ -202,13 +202,16 @@
 
   function countFor(lv){ return 3+lv*2; }
   function limitFor(lv,c){ var per=Math.max(0.6, 1.3-(lv-1)*0.05); return c*per*DIFF[diff].mult; }
-  function fitFont(){ var cols=Math.ceil(Math.sqrt(count)); var w=board.clientWidth, gap=7, cw=(w-gap*(cols-1))/cols;
+  function layout(){ if(!count) return; var cols=Math.ceil(Math.sqrt(count)), rows=Math.ceil(count/cols);
+    var w=board.clientWidth, h=board.clientHeight, gap=7;
+    var cell=Math.floor(Math.min((w-gap*(cols-1))/cols, (h-gap*(rows-1))/rows)); if(cell<12) cell=12;
+    board.style.gridTemplateColumns='repeat('+cols+','+cell+'px)'; board.style.gridTemplateRows='repeat('+rows+','+cell+'px)';
     var maxLen=1; for(var n=1;n<=count;n++){ var L=fmt(n).length; if(L>maxLen) maxLen=L; }
-    var px=Math.min(cw*0.5, (cw*0.82)/(maxLen*0.62)); board.style.setProperty('--cell-fs', px+'px'); }
+    var px=Math.min(cell*0.5, (cell*0.82)/(maxLen*0.62)); board.style.setProperty('--cell-fs', px+'px'); }
 
   function buildBoard(){
     var cols=Math.ceil(Math.sqrt(count)), rows=Math.ceil(count/cols), cells=cols*rows;
-    board.className='board sty-'+style; board.style.gridTemplateColumns='repeat('+cols+',1fr)';
+    board.className='board sty-'+style;
     var order=[]; for(var i=0;i<cells;i++) order.push(i);
     for(var j=order.length-1;j>0;j--){ var k=Math.floor(Math.random()*(j+1)); var tmp=order[j];order[j]=order[k];order[k]=tmp; }
     var slot=new Array(cells).fill(0); for(var n=1;n<=count;n++){ slot[order[n-1]]=n; }
@@ -216,7 +219,7 @@
     for(var c=0;c<cells;c++){ var b=document.createElement('button');
       if(slot[c]===0){ b.className='tile empty'; } else { b.className='tile'; b.textContent=fmt(slot[c]); b.dataset.n=slot[c]; }
       board.appendChild(b); }
-    skinTiles(); requestAnimationFrame(fitFont);
+    skinTiles(); requestAnimationFrame(layout);
   }
 
   function updateBar(){ bar.style.width=Math.max(0,(remain/limit*100))+'%'; }
@@ -242,7 +245,7 @@
     else { mistakes++; hudMiss.textContent=mistakes; remain=Math.max(0,remain-DIFF[diff].pen); updateBar();
       b.classList.remove('bad'); void b.offsetWidth; b.classList.add('bad'); sBad(); }
   });
-  window.addEventListener('resize', function(){ if(playing) fitFont(); });
+  window.addEventListener('resize', function(){ if(playing) layout(); });
 
   /* pause */
   document.getElementById('pause').addEventListener('click', function(){ if(!playing) return; paused=true; document.getElementById('ov-pause').classList.remove('hide'); });
