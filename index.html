@@ -51,8 +51,8 @@
 
   .ad{ margin-top:8px; }
   .ad .lb{ font-size:.65rem; color:var(--sub); text-align:center; }
-  .adbox{ width:300px; max-width:100%; min-height:60px; margin:2px auto 0; display:flex; align-items:center; justify-content:center;
-    border:1px dashed var(--line); border-radius:var(--rad); color:var(--sub); font-size:.78rem; text-align:center; padding:4px; }
+  .adbox{ width:300px; max-width:100%; min-height:250px; margin:2px auto 0; display:flex; align-items:center; justify-content:center;
+    border-radius:var(--rad); color:var(--sub); font-size:.78rem; text-align:center; padding:0; overflow:hidden; }
 
   .overlay{ position:fixed; inset:0; background:rgba(0,0,0,.5); display:flex; align-items:center; justify-content:center; padding:20px; z-index:20; }
   .overlay.hide{ display:none; }
@@ -91,9 +91,12 @@
   <div class="board" id="board"></div>
 
   <div class="ad"><div class="lb">広告</div>
-    <!-- admax -->
-<script src="https://adm.shinobi.jp/s/90211180b2d4d1faaa4426e313ab8906"></script>
-<!-- admax -->  </div>
+    <div class="adbox" id="adbox">
+      <!-- admax -->
+      <script src="https://adm.shinobi.jp/s/90211180b2d4d1faaa4426e313ab8906"></script>
+      <!-- admax -->
+    </div>
+  </div>
 </div>
 
 <div class="toast" id="toast"></div>
